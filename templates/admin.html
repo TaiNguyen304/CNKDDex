@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #f0f0f0; font-family: sans-serif; }
+        #wheel { width: 780px; transition: transform 15s linear; }
+        .admin-controls { margin-bottom: 20px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="admin-controls">
+        <select id="wheelSelector" onchange="changeWheel()">
+            <option value="Wheel.png">Wheel 1</option>
+            <option value="Wheel2.png">Wheel 2</option>
+            <option value="Wheel3.png">Wheel 3</option>
+            <option value="Wheel4.png">Wheel 4</option>
+        </select>
+        <button onclick="requestSpin()">SPIN cho mọi người</button>
+    </div>
+
+    <img id="wheel" src="/static/Wheel.png">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function requestSpin() { socket.emit('request_spin'); }
+        function changeWheel() { socket.emit('request_change_wheel', { wheel_name: document.getElementById('wheelSelector').value }); }
+
+        socket.on('sync_state', (data) => {
+            document.getElementById('wheel').src = '/static/' + data.wheel_name;
+            document.getElementById('wheel').style.transition = "none";
+            document.getElementById('wheel').style.transform = `rotate(${data.total_angle}deg)`;
+        });
+
+        socket.on('start_spin', (data) => {
+            const wheel = document.getElementById('wheel');
+            wheel.style.transition = "transform 15s linear";
+            wheel.style.transform = `rotate(${data.total_angle}deg)`;
+            new Audio('/static/Sound.mp3').play();
+        });
+
+        socket.on('update_wheel', (data) => {
+            const wheel = document.getElementById('wheel');
+            wheel.style.transition = "none";
+            wheel.src = '/static/' + data.wheel_name;
+            wheel.style.transform = "rotate(0deg)";
+        });
+    </script>
+</body>
+</html>

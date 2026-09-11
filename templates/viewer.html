@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Wheel of Fortune - Viewer</title>
+    <style>
+        /* Background động không cần ảnh */
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Quay đều từ đầu đến cuối với linear */
+        #wheel {
+            width: 780px;
+            transition: transform 15s linear;
+        }
+
+        #pointer {
+            position: absolute; bottom: 20px; left: 50%; margin-left: -20px;
+            width: 0; height: 0; border-left: 20px solid transparent;
+            border-right: 20px solid transparent; border-bottom: 40px solid green; z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wheel-wrapper">
+        <img id="wheel" src="/static/Wheel.png">
+        <div id="pointer"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function requestSpin() { socket.emit('request_spin'); }
+
+        socket.on('sync_state', (data) => {
+            document.getElementById('wheel').src = '/static/' + data.wheel_name;
+            document.getElementById('wheel').style.transition = "none";
+            document.getElementById('wheel').style.transform = `rotate(${data.total_angle}deg)`;
+        });
+
+        socket.on('start_spin', (data) => {
+            const wheel = document.getElementById('wheel');
+            wheel.style.transition = "transform 15s linear";
+            wheel.style.transform = `rotate(${data.total_angle}deg)`;
+            new Audio('/static/Sound.mp3').play();
+        });
+
+        socket.on('update_wheel', (data) => {
+            const wheel = document.getElementById('wheel');
+            wheel.style.transition = "none";
+            wheel.src = '/static/' + data.wheel_name;
+            wheel.style.transform = "rotate(0deg)";
+        });
+    </script>
+</body>
+</html>
