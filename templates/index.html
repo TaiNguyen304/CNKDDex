@@ -1,50 +1,289 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Wheel of Fortune - Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập Phòng Chơi</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #fff; font-family: sans-serif; }
-        .wheel-wrapper { position: relative; }
-        #wheel { width: 780px; transition: transform 15s linear; }
-        #pointer { position: absolute; bottom: 20px; left: 50%; margin-left: -20px; width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid green; z-index: 10; }
-        .controls { margin-top: 30px; }
-        button { padding: 20px 50px; font-size: 24px; cursor: pointer; background: gold; border-radius: 10px; border: 2px solid #b8860b; }
+        :root {
+            --blue: blue;
+            --yellow: yellow;
+            --green: green;
+            --red: red;
+            --pink: #ff00cc;
+            --purple: purple;
+            --orange: orange;
+            --black: #000000;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-weight: bold !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            height: 100vh;
+            max-height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: #090d16;
+            color: var(--white);
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(30, 41, 59, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            padding: 24px 22px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .login-header {
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 1.35rem;
+            letter-spacing: 1px;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+
+        .login-header p {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            font-size: 0.95rem;
+            background: #0f172a;
+            color: var(--white);
+            border: 2px solid #334155;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 10px rgba(0, 0, 255, 0.4);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        /* Nút Tham Gia */
+        .btn-join {
+            width: 100%;
+            padding: 13px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: var(--blue);
+            color: var(--white);
+            border: 2px solid var(--white);
+            border-radius: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 0, 255, 0.5);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            margin-top: 4px;
+        }
+
+        .btn-join:active {
+            transform: translateY(2px) scale(0.98);
+        }
+
+        /* Hover tất cả các nút: màu orange, chữ đen */
+        button:hover:not(:disabled),
+        .btn-join:hover {
+            background: var(--orange) !important;
+            color: var(--black) !important;
+            border-color: var(--orange) !important;
+            box-shadow: 0 0 18px rgba(255, 165, 0, 0.8) !important;
+            transform: translateY(-2px);
+        }
+
+        /* Khung thông báo lỗi trực tiếp trên UI */
+        .error-banner {
+            display: none;
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid var(--red);
+            color: #fca5a5;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            text-align: center;
+            line-height: 1.35;
+        }
+
+        .footer-note {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: center;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
-    <div class="wheel-wrapper">
-        <img id="wheel" src="/static/Wheel.png">
-        <div id="pointer"></div>
-    </div>
-    <div class="controls">
-        <button onclick="requestSpin()">SPIN</button>
+    <div class="login-card">
+        <div class="login-header">
+            <h1>THAM GIA PHÒNG CHƠI</h1>
+            <p>Nhập vị trí, mã phòng và mật khẩu được cấp từ Controller</p>
+        </div>
+
+        <div id="errorBanner" class="error-banner"></div>
+
+        <!-- Ô 1: Chọn vị trí (1 - 3) -->
+        <div class="form-group">
+            <label for="playerSelect">1. CHỌN VỊ TRÍ NGƯỜI CHƠI (1 - 3):</label>
+            <select id="playerSelect" class="form-control">
+                <option value="1">Vị trí 1 (Người chơi 1 - Đỏ)</option>
+                <option value="2">Vị trí 2 (Người chơi 2 - Vàng)</option>
+                <option value="3">Vị trí 3 (Người chơi 3 - Xanh dương)</option>
+            </select>
+        </div>
+
+        <!-- Ô 2: Nhập mã phòng (6 chữ số) -->
+        <div class="form-group">
+            <label for="roomIdInput">2. MÃ PHÒNG (6 CHỮ SỐ):</label>
+            <input type="text" id="roomIdInput" class="form-control" placeholder="Ví dụ: 849201" maxlength="6" inputmode="numeric" autocomplete="off">
+        </div>
+
+        <!-- Ô 3: Nhập mật khẩu (4 chữ số) -->
+        <div class="form-group">
+            <label for="authInput">3. MẬT KHẨU (4 CHỮ SỐ):</label>
+            <input type="password" id="authInput" class="form-control" placeholder="Ví dụ: 4920" maxlength="4" inputmode="numeric" autocomplete="off">
+        </div>
+
+        <button id="joinBtn" class="btn-join" onclick="submitJoin()">VÀO PHÒNG CHƠI</button>
+
+        <div class="footer-note">
+            Viewer hoặc Controller có thể truy cập qua URL riêng kèm ?roomid=Mãphòng
+        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
-        const socket = io();
-
-        function requestSpin() { socket.emit('request_spin'); }
-
-        socket.on('sync_state', (data) => {
-            document.getElementById('wheel').src = '/static/' + data.wheel_name;
-            document.getElementById('wheel').style.transition = "none";
-            document.getElementById('wheel').style.transform = `rotate(${data.total_angle}deg)`;
+        // Chặn DevTools và chuột phải
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode === 123 || e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.shiftKey && ['I','J','C','i','j','c'].includes(e.key) || ['U','u','S','s'].includes(e.key))) {
+                e.preventDefault(); return false;
+            }
+            if (e.metaKey && (e.altKey && ['I','J','C','i','j','c'].includes(e.key) || ['U','u'].includes(e.key))) {
+                e.preventDefault(); return false;
+            }
         });
 
-        socket.on('start_spin', (data) => {
-            const wheel = document.getElementById('wheel');
-            wheel.style.transition = "transform 15s linear";
-            wheel.style.transform = `rotate(${data.total_angle}deg)`;
-            new Audio('/static/Sound.mp3').play();
-        });
+        const errorBanner = document.getElementById('errorBanner');
+        const playerSelect = document.getElementById('playerSelect');
+        const roomIdInput = document.getElementById('roomIdInput');
+        const authInput = document.getElementById('authInput');
+        const joinBtn = document.getElementById('joinBtn');
 
-        socket.on('update_wheel', (data) => {
-            const wheel = document.getElementById('wheel');
-            wheel.style.transition = "none";
-            wheel.src = '/static/' + data.wheel_name;
-            wheel.style.transform = "rotate(0deg)";
+        function showError(msg) {
+            errorBanner.innerText = msg;
+            errorBanner.style.display = 'block';
+        }
+
+        function clearError() {
+            errorBanner.style.display = 'none';
+            errorBanner.innerText = '';
+        }
+
+        // Tự động điền nếu có tham số trên URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('roomid')) {
+            roomIdInput.value = urlParams.get('roomid');
+        }
+
+        async function submitJoin() {
+            clearError();
+            const pos = playerSelect.value;
+            const roomId = roomIdInput.value.trim();
+            const auth = authInput.value.trim();
+
+            if (!roomId || roomId.length !== 6 || !/^\d{6}$/.test(roomId)) {
+                showError('Vui lòng nhập đúng Mã phòng gồm 6 chữ số!');
+                return;
+            }
+
+            if (!auth || auth.length !== 4 || !/^\d{4}$/.test(auth)) {
+                showError('Vui lòng nhập đúng Mật khẩu gồm 4 chữ số!');
+                return;
+            }
+
+            const role = 'player' + pos;
+            joinBtn.disabled = true;
+            joinBtn.innerText = 'ĐANG XÁC THỰC...';
+
+            try {
+                const res = await fetch('/api/verify_auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        room_id: roomId,
+                        role: role,
+                        auth: auth
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.valid) {
+                    // Điều hướng sang file Player tương ứng với đủ 2 tham số ?roomid=...&auth=...
+                    const targetPage = `/templates/Player${pos}.html?roomid=${encodeURIComponent(roomId)}&auth=${encodeURIComponent(auth)}`;
+                    window.location.href = targetPage;
+                } else {
+                    showError(data.message || 'Mã phòng hoặc Mật khẩu không chính xác!');
+                    joinBtn.disabled = false;
+                    joinBtn.innerText = 'VÀO PHÒNG CHƠI';
+                }
+            } catch (err) {
+                showError('Không thể kết nối đến máy chủ! Vui lòng thử lại.');
+                joinBtn.disabled = false;
+                joinBtn.innerText = 'VÀO PHÒNG CHƠI';
+            }
+        }
+
+        // Cho phép ấn Enter để submit
+        authInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') submitJoin();
+        });
+        roomIdInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') submitJoin();
         });
     </script>
 </body>

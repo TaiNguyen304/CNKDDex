@@ -1,0 +1,6 @@
+{
+  "name": "Wheel of Fortune",
+  "description": "Interactive multiplayer Wheel of Fortune game with player, admin, and viewer screens synchronized via real-time WebSockets",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

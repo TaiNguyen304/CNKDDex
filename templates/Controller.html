@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Điều Khiển - Controller</title>
+    <style>
+        :root {
+            --blue: blue;
+            --yellow: yellow;
+            --green: green;
+            --red: red;
+            --pink: #ff00cc;
+            --purple: purple;
+            --orange: orange;
+            --black: #000000;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-weight: bold !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            height: 100vh;
+            max-height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: #090d16;
+            color: var(--white);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 8px 12px;
+            gap: 6px;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1280px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(30, 41, 59, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 6px 14px;
+            flex-shrink: 0;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 {
+            font-size: 1.05rem;
+            letter-spacing: 1px;
+            color: var(--white);
+            white-space: nowrap;
+        }
+
+        .top-room-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid var(--blue);
+            border-radius: 8px;
+            padding: 3px 10px;
+        }
+
+        .top-room-label {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+
+        .room-code-display {
+            font-size: 1.15rem;
+            letter-spacing: 2px;
+            color: #60a5fa;
+        }
+
+        .btn-gen-room {
+            background: var(--blue);
+            color: var(--white);
+            border: 2px solid var(--white);
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .header-passwords {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-pass-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid #334155;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .header-pass-item.p1 {
+            border-color: var(--red);
+        }
+        .header-pass-item.p2 {
+            border-color: var(--yellow);
+        }
+        .header-pass-item.p3 {
+            border-color: var(--blue);
+        }
+
+        .header-pass-item.p1 .pass-label { color: #fca5a5; }
+        .header-pass-item.p2 .pass-label { color: var(--yellow); }
+        .header-pass-item.p3 .pass-label { color: #93c5fd; }
+
+        .auth-code {
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+            color: var(--white);
+        }
+
+        .main-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            max-width: 1280px;
+            flex: 1;
+            min-height: 0;
+            margin-bottom: 2px;
+        }
+
+        .column-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+            justify-content: flex-start;
+        }
+
+        .column-right {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.92);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 8px 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .card-soundboard {
+            flex: 1;
+            min-height: 0;
+            justify-content: flex-start;
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            color: var(--white);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* PHÂN PHỐI LƯỢT QUAY */
+        .player-control-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .ctrl-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 8px 4px;
+            font-size: 0.86rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            outline: none;
+            user-select: none;
+        }
+
+        .ctrl-btn .sub-text {
+            font-size: 0.65rem;
+            opacity: 0.9;
+        }
+
+        /* Player 1: Đỏ */
+        .btn-p1 {
+            background: var(--red);
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+        .btn-p1.active {
+            box-shadow: 0 0 12px var(--red), inset 0 0 5px var(--white);
+            transform: scale(1.02);
+        }
+
+        /* Player 2: Vàng */
+        .btn-p2 {
+            background: var(--yellow);
+            color: var(--black);
+            border: 2px solid var(--black);
+        }
+        .btn-p2.active {
+            box-shadow: 0 0 12px var(--yellow), inset 0 0 5px var(--black);
+            transform: scale(1.02);
+        }
+
+        /* Player 3: Xanh dương */
+        .btn-p3 {
+            background: var(--blue);
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+        .btn-p3.active {
+            box-shadow: 0 0 12px var(--blue), inset 0 0 5px var(--white);
+            transform: scale(1.02);
+        }
+
+        /* Lock all: Tím */
+        .btn-lock {
+            background: var(--purple);
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+        .btn-lock.active {
+            box-shadow: 0 0 12px var(--purple), inset 0 0 5px var(--white);
+            transform: scale(1.02);
+        }
+
+        .current-status-banner {
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.78rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 2px 10px;
+            border-radius: 5px;
+            font-size: 0.76rem;
+            border: 2px solid var(--white);
+        }
+
+        .status-badge.p1 {
+            background: var(--red);
+            color: var(--white);
+            border-color: var(--white);
+        }
+        .status-badge.p2 {
+            background: var(--yellow);
+            color: var(--black);
+            border-color: var(--black);
+        }
+        .status-badge.p3 {
+            background: var(--blue);
+            color: var(--white);
+            border-color: var(--white);
+        }
+        .status-badge.none {
+            background: var(--purple);
+            color: var(--white);
+            border-color: var(--white);
+        }
+
+        /* Hover tất cả các nút: màu orange, chữ black */
+        button:hover:not(:disabled),
+        .ctrl-btn:hover,
+        .action-btn:hover,
+        .link-pill:hover,
+        .btn-gen-room:hover,
+        .sfx-btn:hover {
+            background: var(--orange) !important;
+            color: var(--black) !important;
+            border-color: var(--black) !important;
+            box-shadow: 0 0 12px rgba(255, 165, 0, 0.85) !important;
+            transform: translateY(-1px);
+        }
+
+        .secondary-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .select-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        select {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 0.8rem;
+            background: #0f172a;
+            color: var(--white);
+            border: 2px solid #334155;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid var(--white);
+            transition: all 0.2s;
+            outline: none;
+            white-space: nowrap;
+        }
+
+        .btn-change-wheel {
+            background: var(--blue);
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .btn-admin-spin {
+            width: 100%;
+            background: var(--green);
+            color: var(--white);
+            border: 2px solid var(--white);
+            text-align: center;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .link-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6px 4px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.76rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .link-p1 {
+            background: var(--red);
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .link-p2 {
+            background: var(--yellow);
+            color: var(--black);
+            border: 2px solid var(--black);
+        }
+
+        .link-p3 {
+            background: var(--blue);
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .link-viewer {
+            background: var(--green);
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        /* SOUNDBOARD STYLES */
+        .soundboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 6px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .sfx-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4px 6px;
+            font-size: 0.84rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            user-select: none;
+        }
+
+        .sfx-btn.playing {
+            box-shadow: 0 0 14px var(--orange), inset 0 0 6px var(--white) !important;
+            transform: scale(1.03);
+            border-color: var(--orange) !important;
+        }
+
+        .sfx-danger { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Mất điểm */
+        .sfx-lose { background: var(--red); color: var(--white); border: 2px solid var(--black); } /* Mất lượt */
+        .sfx-divide { background: var(--red); color: var(--white); border: 2px solid var(--black); } /* Chia đôi */
+        .sfx-double { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Gấp đôi */
+        .sfx-extra { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Thêm lượt */
+        .sfx-lucky { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* May mắn */
+        .sfx-reward { background: var(--red); color: var(--white); border: 2px solid var(--black); } /* Phần thưởng */
+        .sfx-swap { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Đổi điểm */
+        .sfx-speed { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Siêu tốc */
+        .sfx-jackpot { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Độc đắc */
+        .sfx-challenge { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Thử thách */
+        .sfx-stop { background: var(--red); color: var(--white); border: 2px solid var(--white); } /* Dừng */
+    </style>
+</head>
+<body>
+    <!-- THANH TRÊN CÙNG: MÃ PHÒNG & MẬT KHẨU NGƯỜI CHƠI -->
+    <div class="header">
+        <div class="header-title-box">
+            <h1>CONTROLLER</h1>
+            <div class="top-room-box">
+                <span class="top-room-label">PHÒNG:</span>
+                <span id="roomCodeDisplay" class="room-code-display">------</span>
+            </div>
+            <button class="btn-gen-room" onclick="createNewRoom()">TẠO PHÒNG MỚI</button>
+        </div>
+
+        <div class="header-passwords">
+            <div class="header-pass-item p1">
+                <span class="pass-label">P1 (Đỏ):</span>
+                <span id="p1Pass" class="auth-code">----</span>
+            </div>
+            <div class="header-pass-item p2">
+                <span class="pass-label">P2 (Vàng):</span>
+                <span id="p2Pass" class="auth-code">----</span>
+            </div>
+            <div class="header-pass-item p3">
+                <span class="pass-label">P3 (Xanh):</span>
+                <span id="p3Pass" class="auth-code">----</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-dashboard">
+        <!-- CỘT TRÁI: ĐIỀU HÀNH LƯỢT QUAY & CẤU HÌNH -->
+        <div class="column-left">
+            <!-- 1. PHÂN PHỐI LƯỢT QUAY -->
+            <div class="card">
+                <div class="card-title">1. PHÂN PHỐI LƯỢT QUAY</div>
+                <div class="player-control-grid">
+                    <button id="btnP1" class="ctrl-btn btn-p1" onclick="setActivePlayer('player1')">
+                        <span>P1 Spin</span>
+                        <span class="sub-text">Người chơi 1</span>
+                    </button>
+                    <button id="btnP2" class="ctrl-btn btn-p2" onclick="setActivePlayer('player2')">
+                        <span>P2 Spin</span>
+                        <span class="sub-text">Người chơi 2</span>
+                    </button>
+                    <button id="btnP3" class="ctrl-btn btn-p3" onclick="setActivePlayer('player3')">
+                        <span>P3 Spin</span>
+                        <span class="sub-text">Người chơi 3</span>
+                    </button>
+                    <button id="btnLock" class="ctrl-btn btn-lock" onclick="setActivePlayer('none')">
+                        <span>Lock all</span>
+                        <span class="sub-text">Khóa tất cả</span>
+                    </button>
+                </div>
+
+                <div class="current-status-banner">
+                    <span>TRẠNG THÁI HIỆN TẠI:</span>
+                    <span id="currentStatusBadge" class="status-badge none">ĐANG KHÓA TẤT CẢ</span>
+                </div>
+            </div>
+
+            <!-- 2. CẤU HÌNH VÒNG QUAY & QUAY TRỰC TIẾP -->
+            <div class="card">
+                <div class="card-title">2. ĐỔI NÓN & QUAY TRỰC TIẾP</div>
+                <div class="secondary-grid">
+                    <div class="select-group">
+                        <select id="wheelSelector">
+                            <option value="Wheel.png">Nón 1 (Wheel.png)</option>
+                            <option value="Wheel2.png">Nón 2 (Wheel2.png)</option>
+                            <option value="Wheel3.png">Nón 3 (Wheel3.png)</option>
+                            <option value="Wheel4.png">Nón 4 (Wheel4.png)</option>
+                        </select>
+                        <button class="action-btn btn-change-wheel" onclick="changeWheel()">Đổi nón</button>
+                    </div>
+
+                    <div>
+                        <button class="action-btn btn-admin-spin" onclick="forceSpin()">
+                            QUAY TỪ CONTROLLER
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. LIÊN KẾT NHANH ĐẾN PHÒNG -->
+            <div class="card">
+                <div class="card-title">3. LIÊN KẾT TRUY CẬP PHÒNG CHƠI</div>
+                <div class="links-grid">
+                    <a id="linkP1" class="link-pill link-p1" href="/templates/Player1.html" target="_blank">Player 1 (Đỏ)</a>
+                    <a id="linkP2" class="link-pill link-p2" href="/templates/Player2.html" target="_blank">Player 2 (Vàng)</a>
+                    <a id="linkP3" class="link-pill link-p3" href="/templates/Player3.html" target="_blank">Player 3 (Xanh)</a>
+                    <a id="linkViewer" class="link-pill link-viewer" href="/templates/Viewer.html" target="_blank">Viewer (Xanh lá)</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: SOUNDBOARD HIỆU ỨNG ÂM THANH -->
+        <div class="column-right">
+            <div class="card card-soundboard">
+                <div class="card-title">
+                    <span>4. SOUNDBOARD (PHÁT TOÀN PHÒNG)</span>
+                    <span id="sfxStatusBadge" style="font-size: 0.72rem; color: #94a3b8;">SẴN SÀNG</span>
+                </div>
+                <div class="soundboard-grid">
+                    <button class="sfx-btn sfx-danger" onclick="triggerSfx('MatDiem.mp3', 'Mất điểm', this)">Mất điểm</button>
+                    <button class="sfx-btn sfx-lose" onclick="triggerSfx('MatLuot.mp3', 'Mất lượt', this)">Mất lượt</button>
+                    <button class="sfx-btn sfx-divide" onclick="triggerSfx('ChiaDoi.mp3', 'Chia đôi', this)">Chia đôi</button>
+                    <button class="sfx-btn sfx-double" onclick="triggerSfx('GapDoi.mp3', 'Gấp đôi', this)">Gấp đôi</button>
+                    <button class="sfx-btn sfx-extra" onclick="triggerSfx('ThemLuot.mp3', 'Thêm lượt', this)">Thêm lượt</button>
+                    <button class="sfx-btn sfx-lucky" onclick="triggerSfx('MayMan.mp3', 'May mắn', this)">May mắn</button>
+                    <button class="sfx-btn sfx-reward" onclick="triggerSfx('PhanThuong.mp3', 'Phần thưởng', this)">Phần thưởng</button>
+                    <button class="sfx-btn sfx-swap" onclick="triggerSfx('DoiDiem.mp3', 'Đổi điểm', this)">Đổi điểm</button>
+                    <button class="sfx-btn sfx-speed" onclick="triggerSfx('SieuToc.mp3', 'Siêu tốc', this)">Siêu tốc</button>
+                    <button class="sfx-btn sfx-jackpot" onclick="triggerSfx('DocDac.mp3', 'Độc đắc', this)">Độc đắc</button>
+                    <button class="sfx-btn sfx-challenge" onclick="triggerSfx('ThuThach.mp3', 'Thử thách', this)">Thử thách</button>
+                    <button class="sfx-btn sfx-stop" onclick="stopSfx()">Dừng âm thanh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // Chặn DevTools và chuột phải
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode === 123 || e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.shiftKey && ['I','J','C','i','j','c'].includes(e.key) || ['U','u','S','s'].includes(e.key))) {
+                e.preventDefault(); return false;
+            }
+            if (e.metaKey && (e.altKey && ['I','J','C','i','j','c'].includes(e.key) || ['U','u'].includes(e.key))) {
+                e.preventDefault(); return false;
+            }
+        });
+
+        const BACKEND_URL = (window.location.protocol === 'file:' || !window.location.hostname.includes('onrender.com')) 
+            ? (window.location.hostname.includes('run.app') ? '' : 'https://cnkddex.onrender.com') 
+            : '';
+        const socket = BACKEND_URL ? io(BACKEND_URL, { transports: ['websocket', 'polling'] }) : io();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentRoomId = urlParams.get('roomid') || '123456';
+
+        const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+        const p1Pass = document.getElementById('p1Pass');
+        const p2Pass = document.getElementById('p2Pass');
+        const p3Pass = document.getElementById('p3Pass');
+        const btnP1 = document.getElementById('btnP1');
+        const btnP2 = document.getElementById('btnP2');
+        const btnP3 = document.getElementById('btnP3');
+        const btnLock = document.getElementById('btnLock');
+        const currentStatusBadge = document.getElementById('currentStatusBadge');
+        const wheelSelector = document.getElementById('wheelSelector');
+
+        const linkP1 = document.getElementById('linkP1');
+        const linkP2 = document.getElementById('linkP2');
+        const linkP3 = document.getElementById('linkP3');
+        const linkViewer = document.getElementById('linkViewer');
+
+        function updateRoomLinks(roomId, passwords) {
+            currentRoomId = roomId;
+            roomCodeDisplay.innerText = roomId;
+            if (passwords) {
+                p1Pass.innerText = passwords.player1 || '----';
+                p2Pass.innerText = passwords.player2 || '----';
+                p3Pass.innerText = passwords.player3 || '----';
+
+                linkP1.href = `/templates/Player1.html?roomid=${roomId}&auth=${passwords.player1}`;
+                linkP2.href = `/templates/Player2.html?roomid=${roomId}&auth=${passwords.player2}`;
+                linkP3.href = `/templates/Player3.html?roomid=${roomId}&auth=${passwords.player3}`;
+            }
+            linkViewer.href = `/templates/Viewer.html?roomid=${roomId}`;
+
+            // Cập nhật query param trên URL Controller mà không cần load lại trang
+            const newUrl = window.location.pathname + '?roomid=' + roomId;
+            window.history.replaceState({ path: newUrl }, '', newUrl);
+        }
+
+        function createNewRoom() {
+            socket.emit('controller_create_room');
+        }
+
+        socket.on('connect', () => {
+            // Tham gia room Controller
+            socket.emit('join_game_room', {
+                room_id: currentRoomId,
+                role: 'controller'
+            });
+        });
+
+        socket.on('room_info', (data) => {
+            if (data.room_id) {
+                updateRoomLinks(data.room_id, data.passwords);
+            }
+        });
+
+        socket.on('room_created', (data) => {
+            if (data.room_id) {
+                updateRoomLinks(data.room_id, data.passwords);
+                // Đồng bộ trạng thái phòng mới
+                socket.emit('join_game_room', {
+                    room_id: data.room_id,
+                    role: 'controller'
+                });
+            }
+        });
+
+        function updateUIActivePlayer(activePlayer) {
+            btnP1.classList.remove('active');
+            btnP2.classList.remove('active');
+            btnP3.classList.remove('active');
+            btnLock.classList.remove('active');
+
+            if (activePlayer === 'player1') {
+                btnP1.classList.add('active');
+                currentStatusBadge.className = 'status-badge p1';
+                currentStatusBadge.innerText = 'ĐANG MỞ LƯỢT: PLAYER 1 (ĐỎ)';
+            } else if (activePlayer === 'player2') {
+                btnP2.classList.add('active');
+                currentStatusBadge.className = 'status-badge p2';
+                currentStatusBadge.innerText = 'ĐANG MỞ LƯỢT: PLAYER 2 (VÀNG)';
+            } else if (activePlayer === 'player3') {
+                btnP3.classList.add('active');
+                currentStatusBadge.className = 'status-badge p3';
+                currentStatusBadge.innerText = 'ĐANG MỞ LƯỢT: PLAYER 3 (XANH DƯƠNG)';
+            } else {
+                btnLock.classList.add('active');
+                currentStatusBadge.className = 'status-badge none';
+                currentStatusBadge.innerText = 'ĐÃ KHÓA TẤT CẢ NGƯỜI CHƠI (TÍM)';
+            }
+        }
+
+        function setActivePlayer(playerId) {
+            socket.emit('set_active_player', {
+                room_id: currentRoomId,
+                active_player: playerId
+            });
+            updateUIActivePlayer(playerId);
+        }
+
+        function changeWheel() {
+            const selectedWheel = wheelSelector.value;
+            socket.emit('request_change_wheel', {
+                room_id: currentRoomId,
+                wheel_name: selectedWheel
+            });
+        }
+
+        function forceSpin() {
+            socket.emit('request_spin', {
+                room_id: currentRoomId,
+                player: 'controller'
+            });
+        }
+
+        // --- QUẢN LÝ SOUNDBOARD VÀ ÂM THANH ---
+        let currentSfxAudio = null;
+        let activeSfxButton = null;
+        const sfxStatusBadge = document.getElementById('sfxStatusBadge');
+
+        function playLocalSfx(soundFile, soundName) {
+            if (currentSfxAudio) {
+                currentSfxAudio.pause();
+                currentSfxAudio.currentTime = 0;
+            }
+            if (sfxStatusBadge) {
+                sfxStatusBadge.innerText = 'ĐANG PHÁT: ' + (soundName || soundFile);
+                sfxStatusBadge.style.color = 'var(--orange)';
+            }
+            currentSfxAudio = new Audio('/static/' + soundFile);
+            currentSfxAudio.onended = () => {
+                if (sfxStatusBadge) {
+                    sfxStatusBadge.innerText = 'SẴN SÀNG';
+                    sfxStatusBadge.style.color = '#94a3b8';
+                }
+                if (activeSfxButton) {
+                    activeSfxButton.classList.remove('playing');
+                    activeSfxButton = null;
+                }
+            };
+            currentSfxAudio.onerror = (e) => {
+                console.log('Audio load error for:', soundFile, e);
+            };
+            currentSfxAudio.play().catch(err => console.log('SFX play was prevented:', err));
+        }
+
+        function triggerSfx(soundFile, soundName, btnElement) {
+            // Đổi hiệu ứng thị giác trên nút
+            document.querySelectorAll('.sfx-btn').forEach(b => b.classList.remove('playing'));
+            if (btnElement) {
+                btnElement.classList.add('playing');
+                activeSfxButton = btnElement;
+            }
+
+            // Phát ngay trên controller
+            playLocalSfx(soundFile, soundName);
+
+            // Gửi tín hiệu đến tất cả client trong phòng (Viewer, Player 1-3)
+            socket.emit('play_sfx', {
+                room_id: currentRoomId,
+                sound_file: soundFile,
+                sound_name: soundName
+            });
+        }
+
+        function stopSfx() {
+            if (currentSfxAudio) {
+                currentSfxAudio.pause();
+                currentSfxAudio.currentTime = 0;
+            }
+            if (sfxStatusBadge) {
+                sfxStatusBadge.innerText = 'ĐÃ DỪNG';
+                sfxStatusBadge.style.color = '#94a3b8';
+            }
+            document.querySelectorAll('.sfx-btn').forEach(b => b.classList.remove('playing'));
+            socket.emit('stop_sfx', {
+                room_id: currentRoomId
+            });
+        }
+
+        socket.on('play_sfx', (data) => {
+            if (data && data.sound_file) {
+                playLocalSfx(data.sound_file, data.sound_name);
+            }
+        });
+
+        socket.on('stop_sfx', () => {
+            if (currentSfxAudio) {
+                currentSfxAudio.pause();
+                currentSfxAudio.currentTime = 0;
+            }
+            if (sfxStatusBadge) {
+                sfxStatusBadge.innerText = 'ĐÃ DỪNG';
+                sfxStatusBadge.style.color = '#94a3b8';
+            }
+            document.querySelectorAll('.sfx-btn').forEach(b => b.classList.remove('playing'));
+        });
+
+        socket.on('sync_state', (data) => {
+            if (data.wheel_name) {
+                wheelSelector.value = data.wheel_name;
+            }
+            updateUIActivePlayer(data.active_player);
+        });
+
+        socket.on('update_active_player', (data) => {
+            updateUIActivePlayer(data.active_player);
+        });
+
+        socket.on('update_wheel', (data) => {
+            if (data.wheel_name) {
+                wheelSelector.value = data.wheel_name;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewer</title>
+    <style>
+        :root {
+            --blue: blue;
+            --yellow: yellow;
+            --green: green;
+            --red: red;
+            --pink: #ff00cc;
+            --purple: purple;
+            --orange: orange;
+            --black: #000000;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-weight: bold !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            height: 100vh;
+            max-height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: #090d16;
+            color: var(--white);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+        }
+
+        /* Nhãn Viewer: Xanh lá */
+        .top-banner-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .top-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 28px;
+            border-radius: 9999px;
+            background: var(--green);
+            color: var(--white);
+            border: 2px solid var(--white);
+            box-shadow: 0 4px 15px rgba(0, 128, 0, 0.5);
+            font-size: 1.15rem;
+            letter-spacing: 1px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .room-indicator {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        .top-banner.locked {
+            background: var(--purple);
+            border-color: var(--white);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(128, 0, 128, 0.5);
+        }
+
+        .top-banner.p1 {
+            background: var(--red);
+            border-color: var(--white);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6);
+        }
+
+        .top-banner.p2 {
+            background: var(--yellow);
+            border-color: var(--black);
+            color: var(--black);
+            box-shadow: 0 4px 15px rgba(255, 255, 0, 0.6);
+        }
+
+        .top-banner.p3 {
+            background: var(--blue);
+            border-color: var(--white);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(0, 0, 255, 0.6);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: min(70vh, 80vw, 620px);
+            height: min(70vh, 80vw, 620px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.8));
+            margin: auto 0;
+            flex-shrink: 0;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+            will-change: transform;
+        }
+
+        /* Kim Viewer: Xanh lá viền trắng dày, đầu nhọn chạm sát mép nón */
+        .pointer-box {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 30;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 0 10px rgba(0, 128, 0, 0.9));
+        }
+
+        .sound-notice {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        /* Màn hình thông báo thiếu tham số ?roomid */
+        .missing-room-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(9, 13, 22, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .missing-room-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 2px solid var(--red);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .missing-room-card h2 {
+            color: #fca5a5;
+            font-size: 1.25rem;
+        }
+
+        .missing-room-card p {
+            color: var(--white);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .missing-room-card .code-sample {
+            background: #0f172a;
+            border: 1px solid #475569;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--yellow);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+    </style>
+</head>
+<body>
+    <!-- Thông báo lỗi khi thiếu ?roomid=Mãphòng -->
+    <div id="missingRoomModal" class="missing-room-modal">
+        <div class="missing-room-card">
+            <h2>THIẾU MÃ PHÒNG TRÌNH CHIẾU</h2>
+            <p>Vui lòng nhập tham số ?roomid=Mãphòng trên URL.</p>
+            <div class="code-sample">Ví dụ: /templates/Viewer.html?roomid=123456</div>
+        </div>
+    </div>
+
+    <div class="top-banner-group">
+        <div id="topBanner" class="top-banner locked">
+            <span id="bannerText">LƯỢT QUAY ĐANG TẠM KHÓA</span>
+        </div>
+        <div id="roomIndicator" class="room-indicator">PHÒNG: ------</div>
+    </div>
+
+    <div class="wheel-container">
+        <img id="wheel" src="/static/Wheel.png" alt="Wheel of Fortune">
+        <div class="pointer-box">
+            <svg viewBox="0 0 40 46" width="40" height="46">
+                <polygon points="20,3 37,42 3,42" fill="var(--green)" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="sound-notice">Âm thanh và vòng quay đồng bộ thời gian thực</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // Chặn DevTools và chuột phải
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode === 123 || e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.shiftKey && ['I','J','C','i','j','c'].includes(e.key) || ['U','u','S','s'].includes(e.key))) {
+                e.preventDefault(); return false;
+            }
+            if (e.metaKey && (e.altKey && ['I','J','C','i','j','c'].includes(e.key) || ['U','u'].includes(e.key))) {
+                e.preventDefault(); return false;
+            }
+        });
+
+        // Kiểm tra tham số ?roomid trên URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('roomid');
+        const missingRoomModal = document.getElementById('missingRoomModal');
+        const roomIndicator = document.getElementById('roomIndicator');
+
+        if (!roomId || roomId.trim() === '') {
+            missingRoomModal.style.display = 'flex';
+        } else {
+            roomIndicator.innerText = 'PHÒNG: ' + roomId;
+        }
+
+        // Preload audio để phát ngay lập tức không độ trễ
+        const spinAudio = new Audio('/static/Sound.mp3');
+        spinAudio.preload = 'auto';
+
+        function playSpinAudio(seekTime = 0) {
+            try {
+                spinAudio.currentTime = seekTime;
+                const playPromise = spinAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log('Audio autoplay:', e));
+                }
+            } catch (err) {}
+        }
+
+        // Web Worker chạy ngầm để vòng quay luôn chuyển động đúng thời gian thực kể cả khi ẩn tab
+        const workerBlob = new Blob([`
+            let timer = null;
+            self.onmessage = function(e) {
+                if (e.data === 'start') {
+                    if (timer) clearInterval(timer);
+                    timer = setInterval(function() {
+                        self.postMessage('tick');
+                    }, 20);
+                } else if (e.data === 'stop') {
+                    if (timer) clearInterval(timer);
+                    timer = null;
+                }
+            };
+        `], { type: 'application/javascript' });
+        const timerWorker = new Worker(URL.createObjectURL(workerBlob));
+
+        const BACKEND_URL = (window.location.protocol === 'file:' || !window.location.hostname.includes('onrender.com')) 
+            ? (window.location.hostname.includes('run.app') ? '' : 'https://cnkddex.onrender.com') 
+            : '';
+        const socket = BACKEND_URL ? io(BACKEND_URL, { transports: ['websocket', 'polling'] }) : io();
+
+        const topBanner = document.getElementById('topBanner');
+        const bannerText = document.getElementById('bannerText');
+        const wheel = document.getElementById('wheel');
+
+        let spinState = {
+            startTime: 0,
+            startAngle: 0,
+            targetAngle: 0,
+            duration: 13370,
+            isSpinning: false
+        };
+
+        function updateWheelPhysics() {
+            if (!spinState.isSpinning) return;
+            const now = Date.now();
+            const elapsed = now - spinState.startTime;
+            const progress = Math.min(1, Math.max(0, elapsed / spinState.duration));
+            const currentAngle = spinState.startAngle + (spinState.targetAngle - spinState.startAngle) * progress;
+
+            wheel.style.transform = `rotate(${currentAngle}deg)`;
+
+            if (progress >= 1) {
+                spinState.isSpinning = false;
+                timerWorker.postMessage('stop');
+                wheel.style.transform = `rotate(${spinState.targetAngle}deg)`;
+            }
+        }
+
+        timerWorker.onmessage = function() {
+            updateWheelPhysics();
+        };
+
+        document.addEventListener('visibilitychange', updateWheelPhysics);
+        window.addEventListener('focus', updateWheelPhysics);
+
+        function updateBanner(activePlayer) {
+            if (activePlayer === 'player1') {
+                topBanner.className = 'top-banner p1';
+                bannerText.innerText = 'LƯỢT QUAY: NGƯỜI CHƠI 1 (PLAYER 1)';
+            } else if (activePlayer === 'player2') {
+                topBanner.className = 'top-banner p2';
+                bannerText.innerText = 'LƯỢT QUAY: NGƯỜI CHƠI 2 (PLAYER 2)';
+            } else if (activePlayer === 'player3') {
+                topBanner.className = 'top-banner p3';
+                bannerText.innerText = 'LƯỢT QUAY: NGƯỜI CHƠI 3 (PLAYER 3)';
+            } else {
+                topBanner.className = 'top-banner locked';
+                bannerText.innerText = 'LƯỢT QUAY ĐANG TẠM KHÓA';
+            }
+        }
+
+        if (roomId) {
+            socket.on('connect', () => {
+                socket.emit('join_game_room', {
+                    room_id: roomId,
+                    role: 'viewer'
+                });
+            });
+        }
+
+        socket.on('sync_state', (data) => {
+            // Tự động cập nhật mặt nón đang sử dụng
+            if (data.wheel_name) {
+                wheel.src = '/static/' + data.wheel_name;
+            }
+            const duration = data.spin_duration || 13370;
+            const elapsed = data.elapsed || 0;
+
+            // Tự động cập nhật góc hiện tại
+            if (data.spin_start_time && elapsed < duration) {
+                spinState.startTime = Date.now() - elapsed;
+                spinState.startAngle = data.spin_start_angle || 0;
+                spinState.targetAngle = data.spin_target_angle || data.total_angle || 0;
+                spinState.duration = duration;
+                spinState.isSpinning = true;
+
+                timerWorker.postMessage('start');
+                playSpinAudio(elapsed / 1000);
+
+                function step() {
+                    if (spinState.isSpinning) {
+                        updateWheelPhysics();
+                        requestAnimationFrame(step);
+                    }
+                }
+                requestAnimationFrame(step);
+            } else {
+                spinState.isSpinning = false;
+                timerWorker.postMessage('stop');
+                wheel.style.transform = `rotate(${data.total_angle || 0}deg)`;
+            }
+            updateBanner(data.active_player);
+        });
+
+        socket.on('update_active_player', (data) => {
+            updateBanner(data.active_player);
+        });
+
+        socket.on('start_spin', (data) => {
+            spinState.startTime = Date.now();
+            spinState.startAngle = data.start_angle !== undefined ? data.start_angle : 0;
+            spinState.targetAngle = data.target_angle !== undefined ? data.target_angle : (data.total_angle || 0);
+            spinState.duration = data.duration || 13370;
+            spinState.isSpinning = true;
+
+            timerWorker.postMessage('start');
+            playSpinAudio(0);
+
+            function step() {
+                if (spinState.isSpinning) {
+                    updateWheelPhysics();
+                    requestAnimationFrame(step);
+                }
+            }
+            requestAnimationFrame(step);
+        });
+
+        socket.on('update_wheel', (data) => {
+            spinState.isSpinning = false;
+            timerWorker.postMessage('stop');
+            wheel.src = '/static/' + data.wheel_name;
+            wheel.style.transform = "rotate(0deg)";
+        });
+
+        // --- LẮNG NGHE SOUNDBOARD TỪ CONTROLLER ---
+        let viewerSfxAudio = null;
+
+        socket.on('play_sfx', (data) => {
+            if (data && data.sound_file) {
+                if (viewerSfxAudio) {
+                    viewerSfxAudio.pause();
+                    viewerSfxAudio.currentTime = 0;
+                }
+                viewerSfxAudio = new Audio('/static/' + data.sound_file);
+                viewerSfxAudio.play().catch(e => console.log('Viewer SFX play error:', e));
+            }
+        });
+
+        socket.on('stop_sfx', () => {
+            if (viewerSfxAudio) {
+                viewerSfxAudio.pause();
+                viewerSfxAudio.currentTime = 0;
+            }
+        });
+    </script>
+</body>
+</html>
