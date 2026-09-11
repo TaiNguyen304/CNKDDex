@@ -1,6 +1,14 @@
 import os
 import random
 import time
+
+try:
+    import eventlet
+    eventlet.monkey_patch()
+    async_mode = 'eventlet'
+except Exception:
+    async_mode = 'threading'
+
 from flask import Flask, render_template, request, jsonify, abort
 from flask_socketio import SocketIO, emit, join_room
 
@@ -8,7 +16,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'secret-wheel-key-123')
 
 # Cho phép kết nối CORS từ mọi domain
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode=async_mode)
 
 # Quản lý đa phòng chơi trong bộ nhớ
 # rooms = { room_id: { 'passwords': {...}, 'wheel_name': ..., 'total_angle': ..., ... } }
