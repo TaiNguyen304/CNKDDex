@@ -108,6 +108,16 @@ def render_template_by_name(template_name):
         abort(404)
 
 # 3. API kiểm tra đăng nhập / phòng
+@app.route('/api/create_room', methods=['GET', 'POST'])
+def api_create_room():
+    new_room = generate_room_data()
+    return jsonify({
+        'success': True,
+        'room_id': new_room['room_id'],
+        'passwords': new_room['passwords'],
+        'room': new_room
+    })
+
 @app.route('/api/verify_auth', methods=['POST'])
 def api_verify_auth():
     data = request.get_json() or {}

@@ -315,9 +315,7 @@
         `], { type: 'application/javascript' });
         const timerWorker = new Worker(URL.createObjectURL(workerBlob));
 
-        const BACKEND_URL = (window.location.protocol === 'file:' || !window.location.hostname.includes('onrender.com')) 
-            ? (window.location.hostname.includes('run.app') ? '' : 'https://cnkddex.onrender.com') 
-            : '';
+        const BACKEND_URL = window.location.protocol === 'file:' ? 'https://cnkddex.onrender.com' : '';
         const socket = BACKEND_URL ? io(BACKEND_URL, { transports: ['websocket', 'polling'] }) : io();
 
         const spinBtn = document.getElementById('spinBtn');

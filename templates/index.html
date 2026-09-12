@@ -188,11 +188,7 @@
             <input type="password" id="authInput" class="form-control" placeholder="Ví dụ: 4920" maxlength="4" inputmode="numeric" autocomplete="off">
         </div>
 
-        <button id="joinBtn" class="btn-join" onclick="submitJoin()">VÀO PHÒNG CHƠI</button>
-
-        <div class="footer-note">
-            Viewer hoặc Controller có thể truy cập qua URL riêng kèm ?roomid=Mãphòng
-        </div>
+        <button id="joinBtn" class="btn-join" onclick="submitJoin()">VÀO PHÒNG CHƠI</button> 
     </div>
 
     <script>
@@ -208,6 +204,7 @@
             }
         });
 
+        const BACKEND_URL = window.location.protocol === 'file:' ? 'https://cnkddex.onrender.com' : '';
         const errorBanner = document.getElementById('errorBanner');
         const playerSelect = document.getElementById('playerSelect');
         const roomIdInput = document.getElementById('roomIdInput');
@@ -251,7 +248,8 @@
             joinBtn.innerText = 'ĐANG XÁC THỰC...';
 
             try {
-                const res = await fetch('/api/verify_auth', {
+                const apiBase = BACKEND_URL || '';
+                const res = await fetch(apiBase + '/api/verify_auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

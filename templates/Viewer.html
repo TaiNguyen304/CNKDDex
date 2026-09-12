@@ -38,79 +38,25 @@
 
         body {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-        }
-
-        /* Nhãn Viewer: Xanh lá */
-        .top-banner-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .top-banner {
-            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 28px;
-            border-radius: 9999px;
-            background: var(--green);
-            color: var(--white);
-            border: 2px solid var(--white);
-            box-shadow: 0 4px 15px rgba(0, 128, 0, 0.5);
-            font-size: 1.15rem;
-            letter-spacing: 1px;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-
-        .room-indicator {
-            font-size: 0.78rem;
-            color: #94a3b8;
-            letter-spacing: 1px;
-        }
-
-        .top-banner.locked {
-            background: var(--purple);
-            border-color: var(--white);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(128, 0, 128, 0.5);
-        }
-
-        .top-banner.p1 {
-            background: var(--red);
-            border-color: var(--white);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.6);
-        }
-
-        .top-banner.p2 {
-            background: var(--yellow);
-            border-color: var(--black);
-            color: var(--black);
-            box-shadow: 0 4px 15px rgba(255, 255, 0, 0.6);
-        }
-
-        .top-banner.p3 {
-            background: var(--blue);
-            border-color: var(--white);
-            color: var(--white);
-            box-shadow: 0 4px 15px rgba(0, 0, 255, 0.6);
+            padding: 0;
+            margin: 0;
+            background: #090d16;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
         }
 
         .wheel-container {
             position: relative;
-            width: min(70vh, 80vw, 620px);
-            height: min(70vh, 80vw, 620px);
+            width: min(94vh, 94vw, 850px);
+            height: min(94vh, 94vw, 850px);
             display: flex;
             align-items: center;
             justify-content: center;
             filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.8));
-            margin: auto 0;
+            margin: auto;
             flex-shrink: 0;
         }
 
@@ -136,76 +82,9 @@
             justify-content: center;
             filter: drop-shadow(0 0 10px rgba(0, 128, 0, 0.9));
         }
-
-        .sound-notice {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            text-align: center;
-            margin-bottom: 2px;
-        }
-
-        /* Màn hình thông báo thiếu tham số ?roomid */
-        .missing-room-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(9, 13, 22, 0.95);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .missing-room-card {
-            background: rgba(30, 41, 59, 0.95);
-            border: 2px solid var(--red);
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 500px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .missing-room-card h2 {
-            color: #fca5a5;
-            font-size: 1.25rem;
-        }
-
-        .missing-room-card p {
-            color: var(--white);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .missing-room-card .code-sample {
-            background: #0f172a;
-            border: 1px solid #475569;
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: var(--yellow);
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            user-select: text;
-            -webkit-user-select: text;
-        }
     </style>
 </head>
 <body>
-    <!-- Thông báo lỗi khi thiếu ?roomid=Mãphòng -->
-    <div id="missingRoomModal" class="missing-room-modal">
-        <div class="missing-room-card">
-            <h2>THIẾU MÃ PHÒNG TRÌNH CHIẾU</h2>
-            <p>Vui lòng nhập tham số ?roomid=Mãphòng trên URL.</p>
-            <div class="code-sample">Ví dụ: /templates/Viewer.html?roomid=123456</div>
-        </div>
-    </div>
-
     <div class="wheel-container">
         <img id="wheel" src="/static/Wheel.png" alt="Wheel of Fortune">
         <div class="pointer-box">
@@ -214,7 +93,6 @@
             </svg>
         </div>
     </div>
-
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
@@ -232,15 +110,7 @@
 
         // Kiểm tra tham số ?roomid trên URL
         const urlParams = new URLSearchParams(window.location.search);
-        const roomId = urlParams.get('roomid');
-        const missingRoomModal = document.getElementById('missingRoomModal');
-        const roomIndicator = document.getElementById('roomIndicator');
-
-        if (!roomId || roomId.trim() === '') {
-            missingRoomModal.style.display = 'flex';
-        } else {
-            roomIndicator.innerText = 'PHÒNG: ' + roomId;
-        }
+        const roomId = urlParams.get('roomid') || '123456';
 
         // Preload audio để phát ngay lập tức không độ trễ
         const spinAudio = new Audio('/static/Sound.mp3');
@@ -273,13 +143,9 @@
         `], { type: 'application/javascript' });
         const timerWorker = new Worker(URL.createObjectURL(workerBlob));
 
-        const BACKEND_URL = (window.location.protocol === 'file:' || !window.location.hostname.includes('onrender.com')) 
-            ? (window.location.hostname.includes('run.app') ? '' : 'https://cnkddex.onrender.com') 
-            : '';
+        const BACKEND_URL = window.location.protocol === 'file:' ? 'https://cnkddex.onrender.com' : '';
         const socket = BACKEND_URL ? io(BACKEND_URL, { transports: ['websocket', 'polling'] }) : io();
 
-        const topBanner = document.getElementById('topBanner');
-        const bannerText = document.getElementById('bannerText');
         const wheel = document.getElementById('wheel');
 
         let spinState = {
@@ -314,19 +180,7 @@
         window.addEventListener('focus', updateWheelPhysics);
 
         function updateBanner(activePlayer) {
-            if (activePlayer === 'player1') {
-                topBanner.className = 'top-banner p1';
-                bannerText.innerText = 'LƯỢT QUAY: NGƯỜI CHƠI 1 (PLAYER 1)';
-            } else if (activePlayer === 'player2') {
-                topBanner.className = 'top-banner p2';
-                bannerText.innerText = 'LƯỢT QUAY: NGƯỜI CHƠI 2 (PLAYER 2)';
-            } else if (activePlayer === 'player3') {
-                topBanner.className = 'top-banner p3';
-                bannerText.innerText = 'LƯỢT QUAY: NGƯỜI CHƠI 3 (PLAYER 3)';
-            } else {
-                topBanner.className = 'top-banner locked';
-                bannerText.innerText = 'LƯỢT QUAY ĐANG TẠM KHÓA';
-            }
+            // Viewer chỉ hiển thị vòng quay
         }
 
         if (roomId) {

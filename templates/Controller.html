@@ -595,9 +595,7 @@
             }
         });
 
-        const BACKEND_URL = (window.location.protocol === 'file:' || !window.location.hostname.includes('onrender.com')) 
-            ? (window.location.hostname.includes('run.app') ? '' : 'https://cnkddex.onrender.com') 
-            : '';
+        const BACKEND_URL = window.location.protocol === 'file:' ? 'https://cnkddex.onrender.com' : '';
         const socket = BACKEND_URL ? io(BACKEND_URL, { transports: ['websocket', 'polling'] }) : io();
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -618,6 +616,35 @@
         const linkP2 = document.getElementById('linkP2');
         const linkP3 = document.getElementById('linkP3');
         const linkViewer = document.getElementById('linkViewer');
+        const btnGenRoom = document.querySelector('.btn-gen-room');
+
+        function showNotification(msg) {
+            let toast = document.getElementById('toastNotice');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toastNotice';
+                toast.style.position = 'fixed';
+                toast.style.top = '16px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.background = '#16a34a';
+                toast.style.color = '#ffffff';
+                toast.style.padding = '10px 22px';
+                toast.style.borderRadius = '9999px';
+                toast.style.fontWeight = 'bold';
+                toast.style.boxShadow = '0 6px 20px rgba(0,0,0,0.6)';
+                toast.style.zIndex = '99999';
+                toast.style.transition = 'all 0.3s ease';
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 3000);
+        }
 
         function updateRoomLinks(roomId, passwords) {
             currentRoomId = roomId;
@@ -638,8 +665,47 @@
             window.history.replaceState({ path: newUrl }, '', newUrl);
         }
 
-        function createNewRoom() {
-            socket.emit('controller_create_room');
+        async function createNewRoom() {
+            if (btnGenRoom) {
+                btnGenRoom.disabled = true;
+                btnGenRoom.innerText = 'ĐANG TẠO...';
+            }
+
+            let created = false;
+
+            // 1. Thử gửi qua Socket
+            if (socket && socket.connected) {
+                socket.emit('controller_create_room');
+            }
+
+            // 2. Đồng thời gọi REST API tạo phòng để đảm bảo 100% thành công
+            try {
+                const apiBase = BACKEND_URL || '';
+                const res = await fetch(apiBase + '/api/create_room', { method: 'POST' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.room_id) {
+                        created = true;
+                        updateRoomLinks(data.room_id, data.passwords);
+                        if (socket) {
+                            socket.emit('join_game_room', {
+                                room_id: data.room_id,
+                                role: 'controller'
+                            });
+                        }
+                        showNotification(`Đã tạo phòng ${data.room_id} thành công!`);
+                    }
+                }
+            } catch (err) {
+                console.warn('REST API create_room error:', err);
+            }
+
+            setTimeout(() => {
+                if (btnGenRoom) {
+                    btnGenRoom.disabled = false;
+                    btnGenRoom.innerText = 'TẠO PHÒNG MỚI';
+                }
+            }, 600);
         }
 
         socket.on('connect', () => {
